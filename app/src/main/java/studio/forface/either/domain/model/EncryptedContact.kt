@@ -1,0 +1,6 @@
+package studio.forface.either.domain.model
+
+data class EncryptedContact(
+    val name: String,
+    val email: String
+)
