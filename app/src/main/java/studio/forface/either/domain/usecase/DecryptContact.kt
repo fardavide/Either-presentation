@@ -7,8 +7,8 @@ import arrow.core.right
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import studio.forface.either.domain.Error
 import studio.forface.either.domain.ARMOR
+import studio.forface.either.domain.Error
 import studio.forface.either.domain.model.ClearContact
 import studio.forface.either.domain.model.EncryptedContact
 
@@ -16,20 +16,21 @@ class DecryptContact(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
 
-    suspend operator fun invoke(encrypted: EncryptedContact): Either<Error, ClearContact> {
-        return either {
+    suspend operator fun invoke(encrypted: Either<Error, EncryptedContact>): Either<Error, ClearContact> =
+        either {
 
-            val name = decrypt(encrypted.name)
+            val encryptedContact = encrypted.bind()
+
+            val name = decrypt(encryptedContact.name)
                 .mapLeft { error -> Error("Name: ${error.message}") }
                 .bind()
 
-            val email = decrypt(encrypted.email)
+            val email = decrypt(encryptedContact.email)
                 .mapLeft { error -> Error("Email: ${error.message}") }
                 .bind()
 
             ClearContact(name = name, email = email)
         }
-    }
 
     private suspend fun decrypt(string: String): Either<Error, String> {
         return withContext(dispatcher) {
