@@ -15,13 +15,13 @@ import studio.forface.either.domain.model.EncryptedContact
 @ExperimentalCoroutinesApi
 class DecryptContactTest {
 
-    private val decryptContact = DecryptContact(TestCoroutineDispatcher())
+    private val decryptContact = DecryptContact(DecryptString(TestCoroutineDispatcher()))
 
     @Test
     fun `blank name`() = runBlockingTest {
         // given
         val input = EncryptedContact(name = "", email = "${ARMOR}hi@email.com$ARMOR").right()
-        val expected = Error("Name: ${DecryptContact.ErrorMessages.BLANK}").left()
+        val expected = Error("Name: ${DecryptString.ErrorMessages.BLANK}").left()
 
         // when
         val result = decryptContact(input)
@@ -34,7 +34,7 @@ class DecryptContactTest {
     fun `blank email`() = runBlockingTest {
         // given
         val input = EncryptedContact(name = "${ARMOR}name$ARMOR", email = "").right()
-        val expected = Error("Email: ${DecryptContact.ErrorMessages.BLANK}").left()
+        val expected = Error("Email: ${DecryptString.ErrorMessages.BLANK}").left()
 
         // when
         val result = decryptContact(input)
@@ -47,7 +47,7 @@ class DecryptContactTest {
     fun `not encrypted name`() = runBlockingTest {
         // given
         val input = EncryptedContact(name = "name", email = "${ARMOR}hi@email.com$ARMOR").right()
-        val expected = Error("Name: ${DecryptContact.ErrorMessages.GENERIC}").left()
+        val expected = Error("Name: ${DecryptString.ErrorMessages.GENERIC}").left()
 
         // when
         val result = decryptContact(input)
@@ -60,7 +60,7 @@ class DecryptContactTest {
     fun `not encrypted email`() = runBlockingTest {
         // given
         val input = EncryptedContact(name = "${ARMOR}name$ARMOR", email = "hi@email.com").right()
-        val expected = Error("Email: ${DecryptContact.ErrorMessages.GENERIC}").left()
+        val expected = Error("Email: ${DecryptString.ErrorMessages.GENERIC}").left()
 
         // when
         val result = decryptContact(input)
