@@ -4,7 +4,7 @@ import arrow.core.left
 import arrow.core.right
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import studio.forface.either.data.DataSet
 import studio.forface.either.data.model.ContactDataModel
