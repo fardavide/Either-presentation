@@ -30,6 +30,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arrow.core.right
+import studio.forface.either.domain.ApiError
+import studio.forface.either.domain.DecryptionError
+import studio.forface.either.domain.Error
+import studio.forface.either.domain.ValidationError
 import studio.forface.either.domain.model.ClearContact
 import studio.forface.either.domain.model.ClearMessage
 import studio.forface.either.domain.usecase.GetMessages
@@ -71,7 +75,7 @@ fun Home(getMessages: GetMessages) {
 fun MessagesContainer(getMessages: GetMessages) {
     val list by getMessages().collectAsState(initial = emptyList<ClearMessage>().right())
     list.fold(
-        ifLeft = { Error(error = it.message) },
+        ifLeft = { Error(error = it) },
         ifRight = { Messages(messages = it) }
     )
 }
@@ -112,8 +116,13 @@ fun Message(message: ClearMessage) {
 }
 
 @Composable
-fun Error(error: String) {
-    Text(text = "Error $error!")
+fun Error(error: Error) {
+    val text = when (error) {
+        is ApiError -> "Network error!"
+        is DecryptionError -> "Decryption error!"
+        is ValidationError -> "Validation error!"
+    }
+    Text(text = "Error $text ${error.message}")
 }
 
 @Preview(showBackground = true)

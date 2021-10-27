@@ -18,7 +18,9 @@ import studio.forface.either.data.model.ContactDataModel
 import studio.forface.either.data.model.MessageDataModel
 import studio.forface.either.data.remote.ContactApi
 import studio.forface.either.data.remote.MessageApi
-import studio.forface.either.domain.Error
+import studio.forface.either.domain.ApiError
+import studio.forface.either.domain.DecryptionError
+import studio.forface.either.domain.ValidationError
 import studio.forface.either.domain.model.ClearContact
 import studio.forface.either.domain.model.ClearMessage
 import studio.forface.either.domain.usecase.DecryptContact
@@ -81,7 +83,7 @@ class RepositoryImplTest {
         coEvery { contactApi.getAllContacts() } answers {
             throw IllegalStateException(errorMessage)
         }
-        val expected = Error("${RepositoryImpl.FETCH_CONTACTS_ERROR_MESSAGE}: $errorMessage").left()
+        val expected = ApiError("${RepositoryImpl.FETCH_CONTACTS_ERROR_MESSAGE}: $errorMessage").left()
 
         // when
         val result = repository.getContacts().first()
@@ -94,12 +96,12 @@ class RepositoryImplTest {
     fun `getContacts emits Left from dependency`() = runBlockingTest {
         // given
         val errorMessage = "Ouch!"
-        val error = Error(errorMessage).left()
+        val error = DecryptionError(errorMessage).left()
         coEvery { decryptString(any()) } returns error
         every { contactDao.findAllContacts() } returns flowOf(
             listOf(DavideContactDataModel, AnotherContactDataModel)
         )
-        val expected = Error("Name: $errorMessage").left()
+        val expected = DecryptionError("Name: $errorMessage").left()
 
         // when
         val result = repository.getContacts().first()
@@ -136,7 +138,7 @@ class RepositoryImplTest {
         coEvery { messageApi.getAllMessages() } answers {
             throw IllegalStateException(errorMessage)
         }
-        val expected = Error("${RepositoryImpl.FETCH_MESSAGES_ERROR_MESSAGE}: $errorMessage").left()
+        val expected = ApiError("${RepositoryImpl.FETCH_MESSAGES_ERROR_MESSAGE}: $errorMessage").left()
 
         // when
         val result = repository.getMessages().first()
@@ -149,7 +151,7 @@ class RepositoryImplTest {
     fun `getMessages emits Left from dependency`() = runBlockingTest {
         // given
         val errorMessage = "Ouch!"
-        val error = Error(errorMessage).left()
+        val error = DecryptionError(errorMessage).left()
         coEvery { decryptString(any()) } returns error
         every { messageDao.findAllMessages() } returns flowOf(
             listOf(HelloMessageDataModel, GoodMorningMessageDataModel)
@@ -157,7 +159,7 @@ class RepositoryImplTest {
         every { contactDao.findAllContacts() } returns flowOf(
             listOf(DavideContactDataModel, AnotherContactDataModel)
         )
-        val expected = Error("Subject: $errorMessage").left()
+        val expected = DecryptionError("Subject: $errorMessage").left()
 
         // when
         val result = repository.getMessages().first()
@@ -173,7 +175,7 @@ class RepositoryImplTest {
         every { messageDao.findAllMessages() } returns flowOf(
             listOf(HelloMessageDataModel.copy(fromId = contactId))
         )
-        val expected = Error("${MessageMapper.CONTACT_NOT_FOUND_ERROR_MESSAGE}: $contactId").left()
+        val expected = ValidationError("${MessageMapper.CONTACT_NOT_FOUND_ERROR_MESSAGE}: $contactId").left()
 
         // when
         val result = repository.getMessages().first()

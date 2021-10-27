@@ -2,7 +2,7 @@ package studio.forface.either.domain.usecase
 
 import arrow.core.Either
 import arrow.core.computations.either
-import studio.forface.either.domain.Error
+import studio.forface.either.domain.DecryptionError
 import studio.forface.either.domain.model.ClearContact
 import studio.forface.either.domain.model.EncryptedContact
 
@@ -10,17 +10,15 @@ class DecryptContact(
     private val decryptString: DecryptString = DecryptString()
 ) {
 
-    suspend operator fun invoke(encrypted: Either<Error, EncryptedContact>): Either<Error, ClearContact> =
+    suspend operator fun invoke(encrypted: EncryptedContact): Either<DecryptionError, ClearContact> =
         either {
 
-            val encryptedContact = encrypted.bind()
-
-            val name = decryptString(encryptedContact.name)
-                .mapLeft { error -> Error("Name: ${error.message}") }
+            val name = decryptString(encrypted.name)
+                .mapLeft { error -> DecryptionError("Name: ${error.message}") }
                 .bind()
 
-            val email = decryptString(encryptedContact.email)
-                .mapLeft { error -> Error("Email: ${error.message}") }
+            val email = decryptString(encrypted.email)
+                .mapLeft { error -> DecryptionError("Email: ${error.message}") }
                 .bind()
 
             ClearContact(name = name, email = email)

@@ -6,9 +6,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import studio.forface.either.data.DataSet
 import studio.forface.either.data.model.ContactDataModel
-import studio.forface.either.domain.Error
+import studio.forface.either.domain.ValidationError
 import studio.forface.either.domain.model.EncryptedContact
 
 @ExperimentalCoroutinesApi
@@ -23,7 +22,7 @@ class ContactMapperTest {
             id = 0,
             name = DavideName,
             email = DavideEmail
-        ).right()
+        )
         val expected = EncryptedContact(name = DavideName, email = DavideEmail).right()
 
         // when
@@ -47,7 +46,7 @@ class ContactMapperTest {
                 name = AnotherName,
                 email = AnotherEmail
             )
-        ).right()
+        )
         val expected = listOf(
             EncryptedContact(name = DavideName, email = DavideEmail),
             EncryptedContact(name = AnotherName, email = AnotherEmail),
@@ -67,8 +66,8 @@ class ContactMapperTest {
             id = 0,
             name = DavideName,
             email = InvalidEmail
-        ).right()
-        val expected = Error(ContactMapper.INVALID_EMAIL_FORMAT_ERROR_MESSAGE).left()
+        )
+        val expected = ValidationError(ContactMapper.INVALID_EMAIL_FORMAT_ERROR_MESSAGE).left()
 
         // when
         val result = mapper.toDomainModel(input)
@@ -87,38 +86,14 @@ class ContactMapperTest {
                 email = InvalidEmail
             ),
             buildRandomContactDataModel()
-        ).right()
-        val expected = Error(ContactMapper.INVALID_EMAIL_FORMAT_ERROR_MESSAGE).left()
+        )
+        val expected = ValidationError(ContactMapper.INVALID_EMAIL_FORMAT_ERROR_MESSAGE).left()
 
         // when
         val result = mapper.toDomainModels(input)
 
         // then
         assertEquals(expected, result)
-    }
-
-    @Test
-    fun `maps single contact from Left`() = runBlockingTest {
-        // given
-        val input = Error("something happened").left()
-
-        // when
-        val result = mapper.toDomainModel(input)
-
-        // then
-        assertEquals(input, result)
-    }
-
-    @Test
-    fun `maps collection of contacts from Left`() = runBlockingTest {
-        // given
-        val input = Error("something happened").left()
-
-        // when
-        val result = mapper.toDomainModels(input)
-
-        // then
-        assertEquals(input, result)
     }
 
     private companion object TestData {

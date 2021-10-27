@@ -7,18 +7,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import studio.forface.either.domain.ARMOR
-import studio.forface.either.domain.Error
+import studio.forface.either.domain.DecryptionError
 
 class DecryptString(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
 
-    suspend operator fun invoke(string: String): Either<Error, String> =
+    suspend operator fun invoke(string: String): Either<DecryptionError, String> =
         withContext(dispatcher) {
             when {
                 string.startsWith(ARMOR) && string.endsWith(ARMOR) -> string.removeSurrounding(ARMOR).right()
-                string.isBlank() -> Error(BLANK).left()
-                else -> Error(GENERIC).left()
+                string.isBlank() -> DecryptionError(BLANK).left()
+                else -> DecryptionError(GENERIC).left()
             }
         }
 

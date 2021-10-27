@@ -3,7 +3,6 @@ package studio.forface.either.data
 import arrow.core.Either
 import arrow.core.computations.either
 import arrow.core.left
-import arrow.core.right
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.combine
@@ -17,6 +16,7 @@ import studio.forface.either.data.model.ContactDataModel
 import studio.forface.either.data.model.MessageDataModel
 import studio.forface.either.data.remote.ContactApi
 import studio.forface.either.data.remote.MessageApi
+import studio.forface.either.domain.ApiError
 import studio.forface.either.domain.Error
 import studio.forface.either.domain.Repository
 import studio.forface.either.domain.model.ClearContact
@@ -39,7 +39,7 @@ class RepositoryImpl(
         contactDao.findAllContacts()
             .map<List<ContactDataModel>, Either<Error, List<ClearContact>>> { dataModels ->
                 either {
-                    val encryptedContacts = contactMapper.toDomainModels(dataModels.right())
+                    val encryptedContacts = contactMapper.toDomainModels(dataModels).bind()
                     decryptContacts(encryptedContacts).bind()
                 }
             }
@@ -54,9 +54,9 @@ class RepositoryImpl(
         ) { messagesDataModels, contactsDataModels ->
             either {
                 val encryptedMessages = messageMapper.toDomainModels(
-                    messagesDataModels.right(),
-                    contactsDataModels.right()
-                )
+                    messagesDataModels,
+                    contactsDataModels
+                ).bind()
                 decryptMessages(encryptedMessages).bind()
             }
         }
@@ -67,7 +67,7 @@ class RepositoryImpl(
 
     private suspend fun <T> FlowCollector<Either<Error, List<T>>>.fetchAndSaveContacts() {
         val fromApi = Either.catch { contactApi.getAllContacts() }
-            .mapLeft { Error("$FETCH_CONTACTS_ERROR_MESSAGE: ${it.message}") }
+            .mapLeft { ApiError("$FETCH_CONTACTS_ERROR_MESSAGE: ${it.message}") }
 
         fromApi.fold(
             ifLeft = { emit(it.left()) },
@@ -77,7 +77,7 @@ class RepositoryImpl(
 
     private suspend fun <T> FlowCollector<Either<Error, List<T>>>.fetchAndSaveMessages() {
         val messagesFromApi = Either.catch { messageApi.getAllMessages() }
-            .mapLeft { Error("$FETCH_MESSAGES_ERROR_MESSAGE: ${it.message}") }
+            .mapLeft { ApiError("$FETCH_MESSAGES_ERROR_MESSAGE: ${it.message}") }
 
         messagesFromApi.fold(
             ifLeft = { emit(it.left()) },
