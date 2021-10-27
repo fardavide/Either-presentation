@@ -32,14 +32,12 @@ import androidx.compose.ui.unit.sp
 import arrow.core.right
 import studio.forface.either.domain.model.ClearContact
 import studio.forface.either.domain.model.ClearMessage
-import studio.forface.either.domain.usecase.GetContacts
 import studio.forface.either.domain.usecase.GetMessages
 import studio.forface.either.ui.theme.EitherTheme
 
 class MainActivity : ComponentActivity() {
 
     private val getMessages = GetMessages()
-    private val getContacts = GetContacts()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +45,7 @@ class MainActivity : ComponentActivity() {
             EitherTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    Home(getMessages, getContacts)
+                    Home(getMessages)
                 }
             }
         }
@@ -55,7 +53,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Home(getMessages: GetMessages, getContacts: GetContacts) {
+fun Home(getMessages: GetMessages) {
     Scaffold(
         topBar = {
             TopAppBar(contentPadding = PaddingValues(4.dp)) {
@@ -66,7 +64,6 @@ fun Home(getMessages: GetMessages, getContacts: GetContacts) {
         }
     ) {
         MessagesContainer(getMessages)
-        // TODO: add contacts screen - not in scope
     }
 }
 
@@ -115,21 +112,6 @@ fun Message(message: ClearMessage) {
 }
 
 @Composable
-fun ContactsContainer(getContacts: GetContacts) {
-
-}
-
-@Composable
-fun Contacts(contacts: Collection<ClearContact>) {
-
-}
-
-@Composable
-fun Contact(contact: ClearContact) {
-
-}
-
-@Composable
 fun Error(error: String) {
     Text(text = "Error $error!")
 }
@@ -138,6 +120,28 @@ fun Error(error: String) {
 @Composable
 fun DefaultPreview() {
     EitherTheme {
-        Home(GetMessages(), GetContacts())
+        Scaffold(
+            topBar = {
+                TopAppBar(contentPadding = PaddingValues(4.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        Text(fontSize = 24.sp, style = TextStyle(fontWeight = FontWeight.Bold), text = "Inbox")
+                    }
+                }
+            }
+        ) {
+            Messages(
+                listOf(
+                    ClearMessage(
+                        "Something super cool is coming!!",
+                        ClearContact("Proton", "proton@email.com")
+                    ),
+                    ClearMessage(
+                        "Good morning",
+                        ClearContact("Davide", "davide@email.com")
+                    ),
+                )
+            )
+        }
     }
 }
+

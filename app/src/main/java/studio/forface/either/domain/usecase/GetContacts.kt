@@ -7,6 +7,7 @@ import studio.forface.either.domain.Error
 import studio.forface.either.domain.Repository
 import studio.forface.either.domain.model.ClearContact
 
+@Suppress("unused")
 class GetContacts(
     private val repository: Repository = RepositoryImpl()
 ) {
