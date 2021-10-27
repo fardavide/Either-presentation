@@ -1,6 +1,6 @@
 # Error handling with Either
 
-**This solution brings consistency across all the layers, taking `Either` as only way to handle errors.** 
+**This solution brings consistency across all the layers, taking `Either` as only way to handle errors.**
 
 On common projects, in fact, we have `DataResult` from API ( Core ), sealed classes between Domain / Presentation, some `null` here, some exception there, some differnt type from various libraries ( like Store ) and some more other internal sealed classes ( probably in repository )
 
@@ -29,4 +29,3 @@ In this case should we move the sealed class down to the repository? But we will
 ## Conclusions
 
 `Either` allows to have something similar, across all the layers, keeping the happy path ( `Right` ) separated from the errors ( `Left` ), with very powerful but simple operators that enable us to write code like errors don't exist, while we are already handling them, without even knowing it.
-
